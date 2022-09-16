@@ -73,10 +73,6 @@ impl GameBoard {
         Self { slots }
     }
 
-    pub fn get(&self, pos: Position) -> Option<GamePiece> {
-        self.slots[pos.y() as usize][pos.y() as usize]
-    }
-
     pub fn move_piece(&mut self, src: Position, dst: Position) -> Result<()> {
         if self.slots[dst.y() as usize][dst.x() as usize].is_some() {
             bail!("target slot already has a piece!")
