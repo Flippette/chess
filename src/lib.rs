@@ -8,7 +8,6 @@ pub struct GameBoard {
 
 #[derive(Debug, Clone, Copy)]
 pub struct GamePiece {
-    pos: Position,
     kind: PieceKind,
     side: Side,
 }
@@ -43,107 +42,39 @@ impl GameBoard {
 
         // Spawn the pawns
         for col in 0..slots.len() {
-            slots[1][col] = Some(GamePiece::new(
-                Position::new(col as u8, 1).unwrap(),
-                PieceKind::Pawn,
-                Side::White,
-            ));
-            slots[6][col] = Some(GamePiece::new(
-                Position::new(col as u8, 6).unwrap(),
-                PieceKind::Pawn,
-                Side::Black,
-            ));
+            slots[1][col] = Some(GamePiece::new(PieceKind::Pawn, Side::White));
+            slots[6][col] = Some(GamePiece::new(PieceKind::Pawn, Side::Black));
         }
 
         // Spawn the rooks
-        slots[0][7] = Some(GamePiece::new(
-            Position::new(7, 0).unwrap(),
-            PieceKind::Rook,
-            Side::White,
-        ));
-        slots[0][0] = Some(GamePiece::new(
-            Position::new(0, 0).unwrap(),
-            PieceKind::Rook,
-            Side::White,
-        ));
-        slots[7][7] = Some(GamePiece::new(
-            Position::new(7, 0).unwrap(),
-            PieceKind::Rook,
-            Side::Black,
-        ));
-        slots[7][0] = Some(GamePiece::new(
-            Position::new(0, 0).unwrap(),
-            PieceKind::Rook,
-            Side::Black,
-        ));
+        slots[0][7] = Some(GamePiece::new(PieceKind::Rook, Side::White));
+        slots[0][0] = Some(GamePiece::new(PieceKind::Rook, Side::White));
+        slots[7][7] = Some(GamePiece::new(PieceKind::Rook, Side::Black));
+        slots[7][0] = Some(GamePiece::new(PieceKind::Rook, Side::Black));
 
         // Spawn the knights
-        slots[0][6] = Some(GamePiece::new(
-            Position::new(6, 0).unwrap(),
-            PieceKind::Knight,
-            Side::White,
-        ));
-        slots[0][1] = Some(GamePiece::new(
-            Position::new(1, 0).unwrap(),
-            PieceKind::Knight,
-            Side::White,
-        ));
-        slots[7][6] = Some(GamePiece::new(
-            Position::new(6, 7).unwrap(),
-            PieceKind::Knight,
-            Side::Black,
-        ));
-        slots[7][1] = Some(GamePiece::new(
-            Position::new(1, 7).unwrap(),
-            PieceKind::Knight,
-            Side::Black,
-        ));
+        slots[0][6] = Some(GamePiece::new(PieceKind::Knight, Side::White));
+        slots[0][1] = Some(GamePiece::new(PieceKind::Knight, Side::White));
+        slots[7][6] = Some(GamePiece::new(PieceKind::Knight, Side::Black));
+        slots[7][1] = Some(GamePiece::new(PieceKind::Knight, Side::Black));
 
         // Spawn the bishops
-        slots[0][5] = Some(GamePiece::new(
-            Position::new(5, 0).unwrap(),
-            PieceKind::Bishop,
-            Side::White,
-        ));
-        slots[0][2] = Some(GamePiece::new(
-            Position::new(2, 0).unwrap(),
-            PieceKind::Bishop,
-            Side::White,
-        ));
-        slots[7][5] = Some(GamePiece::new(
-            Position::new(5, 7).unwrap(),
-            PieceKind::Bishop,
-            Side::Black,
-        ));
-        slots[7][2] = Some(GamePiece::new(
-            Position::new(2, 7).unwrap(),
-            PieceKind::Bishop,
-            Side::Black,
-        ));
+        slots[0][5] = Some(GamePiece::new(PieceKind::Bishop, Side::White));
+        slots[0][2] = Some(GamePiece::new(PieceKind::Bishop, Side::White));
+        slots[7][5] = Some(GamePiece::new(PieceKind::Bishop, Side::Black));
+        slots[7][2] = Some(GamePiece::new(PieceKind::Bishop, Side::Black));
 
         // Spawn the queens and kings
-        slots[0][4] = Some(GamePiece::new(
-            Position::new(4, 0).unwrap(),
-            PieceKind::King,
-            Side::White,
-        ));
-        slots[0][3] = Some(GamePiece::new(
-            Position::new(3, 0).unwrap(),
-            PieceKind::Queen,
-            Side::White,
-        ));
-        slots[7][4] = Some(GamePiece::new(
-            Position::new(4, 7).unwrap(),
-            PieceKind::Queen,
-            Side::Black,
-        ));
-        slots[7][3] = Some(GamePiece::new(
-            Position::new(3, 7).unwrap(),
-            PieceKind::King,
-            Side::Black,
-        ));
+        slots[0][4] = Some(GamePiece::new(PieceKind::King, Side::White));
+        slots[0][3] = Some(GamePiece::new(PieceKind::Queen, Side::White));
+        slots[7][4] = Some(GamePiece::new(PieceKind::Queen, Side::Black));
+        slots[7][3] = Some(GamePiece::new(PieceKind::King, Side::Black));
 
         Self { slots }
+    }
+
+    pub fn get(&self, pos: Position) -> Option<GamePiece> {
+        self.slots[pos.y() as usize][pos.y() as usize]
     }
 
     pub fn move_piece(&mut self, src: Position, dst: Position) -> Result<()> {
@@ -151,22 +82,23 @@ impl GameBoard {
             bail!("target slot already has a piece!")
         }
 
-        if let Some(mut piece) = self.slots[src.y() as usize][src.x() as usize] {
+        let piece_slot = (src.y() as usize, src.x() as usize);
+        if let Some(mut piece) = self.slots[piece_slot.0][piece_slot.1] {
             if matches!(piece.kind(), PieceKind::Bishop | PieceKind::Queen) {
-                let hor_mul = if dst.x() as i8 - piece.pos.x() as i8 > 0 {
+                let hor_mul = if dst.x() as i8 - piece_slot.1 as i8 > 0 {
                     1
                 } else {
                     -1
                 };
-                let ver_mul = if dst.y() as i8 - piece.pos.y() as i8 > 0 {
+                let ver_mul = if dst.y() as i8 - piece_slot.0 as i8 > 0 {
                     1
                 } else {
                     -1
                 };
 
-                for i in 0..(dst.x() as i8 - piece.pos.x() as i8).abs() {
-                    if self.slots[(piece.pos.y() + (i * ver_mul) as u8) as usize]
-                        [(piece.pos.x() + (i * hor_mul) as u8) as usize]
+                for i in 0..(dst.x() as i8 - piece_slot.0 as i8).abs() {
+                    if self.slots[piece_slot.1 + (i * ver_mul) as usize]
+                        [piece_slot.1 + (i * hor_mul) as usize]
                         .is_some()
                     {
                         bail!("piece in path of movement!");
@@ -175,29 +107,25 @@ impl GameBoard {
             }
 
             if matches!(piece.kind(), PieceKind::Rook | PieceKind::Queen) {
-                if piece.pos.x() == dst.x() {
-                    let mul = if dst.x() as i8 - piece.pos.x() as i8 > 0 {
+                if piece_slot.1 as u8 == dst.x() {
+                    let mul = if dst.x() as i8 - piece_slot.1 as i8 > 0 {
                         1
                     } else {
                         -1
                     };
-                    for i in 0..(dst.x() as i8 - piece.pos.x() as i8).abs() {
-                        if self.slots[piece.pos.y() as usize]
-                            [(piece.pos.x() + (i * mul) as u8) as usize]
-                            .is_some()
-                        {
+                    for i in 0..(dst.x() as i8 - piece_slot.1 as i8).abs() {
+                        if self.slots[piece_slot.0][piece_slot.1 + (i * mul) as usize].is_some() {
                             bail!("piece in path of movement!");
                         }
                     }
                 } else {
-                    let mul = if dst.y() as i8 - piece.pos.y() as i8 > 0 {
+                    let mul = if dst.y() as i8 - piece_slot.0 as i8 > 0 {
                         1
                     } else {
                         -1
                     };
-                    for i in 0..(dst.y() as i8 - piece.pos.y() as i8).abs() {
-                        if self.slots[piece.pos.x() as usize]
-                            [(piece.pos.y() + (i * mul) as u8) as usize]
+                    for i in 0..(dst.y() as i8 - piece_slot.0 as i8).abs() {
+                        if self.slots[piece_slot.1][piece_slot.0 + (i * mul) as u8 as usize]
                             .is_some()
                         {
                             bail!("piece in path of movement!");
@@ -206,7 +134,64 @@ impl GameBoard {
                 }
             }
 
-            piece.move_self(dst)?;
+            let moved = (dst.x() as i8 - src.x() as i8, dst.y() as i8 - src.y() as i8);
+            match piece.kind {
+                PieceKind::Pawn => {
+                    if moved.0 != 0 {
+                        bail!("invalid move!");
+                    }
+
+                    match piece.side {
+                        Side::White => {
+                            if !(moved.1 == 2 && piece_slot.0 == 1 || moved.1 == 1) {
+                                bail!("invalid move!")
+                            }
+                        }
+                        Side::Black => {
+                            if !(moved.1 == -2 && piece_slot.0 == 6 || moved.1 == -1) {
+                                bail!("invalid move!")
+                            }
+                        }
+                    }
+                    match piece_slot.0 {
+                        0 | 7 => piece.promote(PieceKind::Queen)?,
+                        _ => (),
+                    }
+                }
+                PieceKind::Rook => {
+                    if moved.0 != 0 && moved.1 != 0 || moved.0 == 0 && moved.1 == 0 {
+                        bail!("invalid move!")
+                    }
+                }
+                PieceKind::Bishop => {
+                    if moved.0.abs() != moved.1.abs() {
+                        bail!("invalid move!")
+                    }
+                }
+                PieceKind::Knight => {
+                    if !matches!((moved.0.abs(), moved.1.abs()), (1, 2) | (2, 1)) {
+                        bail!("invalid move!")
+                    }
+                }
+                PieceKind::Queen => {
+                    let legal = match moved {
+                        (0, y) if y != 0 => true,
+                        (x, 0) if x != 0 => true,
+                        (x, y) if x != 0 && y != 0 && x.abs() == y.abs() => true,
+                        _ => false,
+                    };
+
+                    if !legal {
+                        bail!("invalid move!")
+                    }
+                }
+                PieceKind::King => {
+                    if !(moved.0.abs() <= 1 && moved.1.abs() <= 1) {
+                        bail!("invalid move!")
+                    }
+                }
+            }
+
             self.slots[dst.y() as usize][dst.x() as usize] = Some(
                 self.slots[src.y() as usize][src.x() as usize]
                     .take()
@@ -252,18 +237,10 @@ impl fmt::Display for GameBoard {
 
 impl GamePiece {
     #[must_use]
-    pub fn new(pos: Position, kind: PieceKind, side: Side) -> Self {
-        Self { pos, kind, side }
+    pub fn new(kind: PieceKind, side: Side) -> Self {
+        Self { kind, side }
     }
 
-    #[must_use]
-    pub fn row(&self) -> u8 {
-        self.pos.x()
-    }
-    #[must_use]
-    pub fn col(&self) -> u8 {
-        self.pos.y()
-    }
     #[must_use]
     pub fn side(&self) -> Side {
         self.side
@@ -276,108 +253,11 @@ impl GamePiece {
     fn promote(&mut self, target: PieceKind) -> Result<()> {
         match target {
             PieceKind::Pawn | PieceKind::King => bail!("illegal promotion!"),
-            _ => match self.kind {
-                PieceKind::Pawn => {
-                    if self.side == Side::Black && self.pos.y() == 0
-                        || self.side == Side::White && self.pos.y() == 7
-                    {
-                        self.kind = target;
-                        Ok(())
-                    } else {
-                        bail!("illegal promotion!")
-                    }
-                }
-                _ => bail!("illegal promotion!"),
-            },
-        }
-    }
-
-    pub fn move_self(&mut self, target_pos: Position) -> Result<()> {
-        let moved = (
-            target_pos.x() as i8 - self.pos.x() as i8,
-            target_pos.y() as i8 - self.pos.y() as i8,
-        );
-
-        match self.kind {
-            PieceKind::Pawn => {
-                if moved.0 != 0 {
-                    bail!("invalid move!");
-                }
-
-                match self.side {
-                    Side::White => {
-                        if moved.1 < 1 {
-                            bail!("invalid move!")
-                        } else if moved.1 == 2 && self.pos.y() == 1 || moved.1 == 1 {
-                            self.pos = target_pos;
-                        } else {
-                            bail!("invalid move!")
-                        }
-                    }
-                    Side::Black => {
-                        if moved.1 > -1 {
-                            bail!("invalid move")
-                        } else if moved.1 == -2 && self.pos.y() == 6 || moved.1 == -1 {
-                            self.pos = target_pos;
-                        } else {
-                            bail!("invalid move!")
-                        }
-                    }
-                }
-                if self.pos.y() == 0 || self.pos.y() == 7 {
-                    self.promote(PieceKind::Queen)?;
-                }
-            }
-            PieceKind::Rook => {
-                if moved.0 != 0 && moved.1 == 0 || moved.0 == 0 && moved.1 != 0 {
-                    self.pos = target_pos;
-                } else {
-                    bail!("invalid move!")
-                }
-            }
-            PieceKind::Bishop => {
-                if moved.0.abs() == moved.1.abs() {
-                    self.pos = target_pos;
-
-                    // due to design quirks we have to perform trample check in
-                    // GameBoard::move_piece()
-                } else {
-                    bail!("invalid move!")
-                }
-            }
-            PieceKind::Knight => {
-                let legal = matches!((moved.0.abs(), moved.1.abs()), (1, 2) | (2, 1));
-
-                if legal {
-                    self.pos = target_pos;
-                } else {
-                    bail!("invalid move!")
-                }
-            }
-            PieceKind::Queen => {
-                let legal = match moved {
-                    (0, y) if y != 0 => true,
-                    (x, 0) if x != 0 => true,
-                    (x, y) if x != 0 && y != 0 && x.abs() == y.abs() => true,
-                    _ => false,
-                };
-
-                if legal {
-                    self.pos = target_pos;
-                } else {
-                    bail!("invalid move!")
-                }
-            }
-            PieceKind::King => {
-                if moved.0.abs() <= 1 && moved.1.abs() <= 1 {
-                    self.pos = target_pos;
-                } else {
-                    bail!("invalid move!")
-                }
+            _ => {
+                self.kind = target;
+                Ok(())
             }
         }
-
-        Ok(())
     }
 }
 
