@@ -92,9 +92,9 @@ impl GameBoard {
                     -1
                 };
 
-                for i in 0..(dst.x() as i8 - piece_slot.0 as i8).abs() {
-                    if self.slots[piece_slot.1 + (i * ver_mul) as usize]
-                        [piece_slot.1 + (i * hor_mul) as usize]
+                for i in 1..(dst.x() as i8 - piece_slot.1 as i8).abs() {
+                    if self.slots[(piece_slot.0 as i8 + (i * ver_mul)) as usize]
+                        [(piece_slot.1 as i8 + (i * hor_mul)) as usize]
                         .is_some()
                     {
                         bail!("piece in path of movement!");
@@ -104,26 +104,24 @@ impl GameBoard {
 
             if matches!(piece.kind(), PieceKind::Rook | PieceKind::Queen) {
                 if piece_slot.1 as u8 == dst.x() {
+                    let mul = if dst.y() as i8 - piece_slot.0 as i8 > 0 {
+                        1
+                    } else {
+                        -1
+                    };
+                    for i in 1..(dst.y() as i8 - piece_slot.0 as i8).abs() {
+                        if self.slots[piece_slot.0][(piece_slot.1 as i8 + (i * mul)) as usize].is_some() {
+                            bail!("piece in path of movement!");
+                        }
+                    }
+                } else {
                     let mul = if dst.x() as i8 - piece_slot.1 as i8 > 0 {
                         1
                     } else {
                         -1
                     };
                     for i in 0..(dst.x() as i8 - piece_slot.1 as i8).abs() {
-                        if self.slots[piece_slot.0][piece_slot.1 + (i * mul) as usize].is_some() {
-                            bail!("piece in path of movement!");
-                        }
-                    }
-                } else {
-                    let mul = if dst.y() as i8 - piece_slot.0 as i8 > 0 {
-                        1
-                    } else {
-                        -1
-                    };
-                    for i in 0..(dst.y() as i8 - piece_slot.0 as i8).abs() {
-                        if self.slots[piece_slot.1][piece_slot.0 + (i * mul) as u8 as usize]
-                            .is_some()
-                        {
+                        if self.slots[piece_slot.1][(piece_slot.0 as i8 + (i * mul)) as usize].is_some() {
                             bail!("piece in path of movement!");
                         }
                     }
@@ -252,7 +250,9 @@ impl GamePiece {
     }
 
     fn promote(&mut self, target: PieceKind) -> Result<()> {
-        if self.kind != PieceKind::Pawn { bail!("cannot promote a non-pawn!") }
+        if self.kind != PieceKind::Pawn {
+            bail!("cannot promote a non-pawn!")
+        }
 
         match target {
             PieceKind::Pawn | PieceKind::King => bail!("illegal promotion!"),

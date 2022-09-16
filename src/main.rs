@@ -53,6 +53,9 @@ fn main() -> Result<()> {
             break inp_vec;
         };
 
-        board.move_piece(user_inp[0], user_inp[1])?;
+        match board.move_piece(user_inp[0], user_inp[1]) {
+            Ok(_) => continue,
+            Err(e) => { println!("{:?}\n", e); continue; }
+        }
     }
 }
