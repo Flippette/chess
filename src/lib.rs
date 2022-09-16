@@ -210,7 +210,10 @@ impl fmt::Display for GameBoard {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut out = String::new();
 
-        for row in self.slots {
+        out.push_str("  12345678\n");
+
+        for (i, row) in self.slots.iter().enumerate() {
+            out.push_str(&format!("{} ", (i as u8 + 97) as char));
             for slot in row {
                 out.push(match slot {
                     None => ' ',
@@ -237,16 +240,20 @@ impl GamePiece {
         Self { kind, side }
     }
 
+    #[inline(always)]
     #[must_use]
     pub fn side(&self) -> Side {
         self.side
     }
+    #[inline(always)]
     #[must_use]
     pub fn kind(&self) -> PieceKind {
         self.kind
     }
 
     fn promote(&mut self, target: PieceKind) -> Result<()> {
+        if self.kind != PieceKind::Pawn { bail!("cannot promote a non-pawn!") }
+
         match target {
             PieceKind::Pawn | PieceKind::King => bail!("illegal promotion!"),
             _ => {
@@ -265,10 +272,12 @@ impl Position {
         Ok(Self(row << 4 | col))
     }
 
+    #[inline(always)]
     #[must_use]
     pub fn x(&self) -> u8 {
         self.0 >> 4
     }
+    #[inline(always)]
     #[must_use]
     pub fn y(&self) -> u8 {
         self.0 & 0x0f
