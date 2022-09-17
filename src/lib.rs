@@ -67,8 +67,8 @@ impl GameBoard {
         // Spawn the queens and kings
         slots[0][4] = Some(GamePiece::new(PieceKind::King, Side::White));
         slots[0][3] = Some(GamePiece::new(PieceKind::Queen, Side::White));
-        slots[7][4] = Some(GamePiece::new(PieceKind::Queen, Side::Black));
-        slots[7][3] = Some(GamePiece::new(PieceKind::King, Side::Black));
+        slots[7][4] = Some(GamePiece::new(PieceKind::King, Side::Black));
+        slots[7][3] = Some(GamePiece::new(PieceKind::Queen, Side::Black));
 
         Self { slots }
     }
